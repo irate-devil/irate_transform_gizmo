@@ -224,42 +224,28 @@ fn drag_gizmo(
     global_transforms: Query<&GlobalTransform>,
     gizmo_query: Query<(&GlobalTransform, &PickingInteraction), With<TransformGizmo>>,
 ) {
-    let picking_camera = if let Some(cam) = pick_cam.iter().last() {
-        cam
-    } else {
-        // Not exactly one picking camera.
-        return;
+    let Some(picking_camera) = pick_cam.iter().last() else {
+        return; // Not exactly one picking camera.
     };
-    let picking_ray = if let Some(ray) = picking_camera.get_ray() {
-        ray
-    } else {
-        // Picking camera does not have a ray.
-        return;
+    let Some(picking_ray) = picking_camera.get_ray() else {
+        return; // Picking camera does not have a ray.
     };
     // Gizmo handle should project mouse motion onto the axis of the handle. Perpendicular motion
     // should have no effect on the handle. We can do this by projecting the vector from the handle
     // click point to mouse's current position, onto the axis of the direction we are dragging. See
     // the wiki article for details: https://en.wikipedia.org/wiki/Vector_projection
-    let gizmo_transform =
-        if let Ok((transform, &PickingInteraction::Pressed)) = gizmo_query.get_single() {
-            transform.to_owned()
-        } else {
-            return;
-        };
-    let mut gizmo = if let Ok(g) = gizmo_mut.get_single_mut() {
-        g
-    } else {
+    let Ok((&gizmo_transform, &PickingInteraction::Pressed)) = gizmo_query.get_single() else {
+        return;
+    };
+    let Ok(mut gizmo) = gizmo_mut.get_single_mut() else {
         error!("Number of transform gizmos is != 1");
         return;
     };
-    let gizmo_origin = match gizmo.origin_drag_start {
-        Some(origin) => origin,
-        None => {
-            let origin = gizmo_transform.translation();
-            gizmo.origin_drag_start = Some(origin);
-            origin
-        }
-    };
+    let gizmo_origin = gizmo.origin_drag_start.unwrap_or_else(|| {
+        let origin = gizmo_transform.translation();
+        gizmo.origin_drag_start = Some(origin);
+        origin
+    });
     let selected_iter = transform_query
         .iter_mut()
         .filter(|(s, ..)| s.is_selected)
@@ -290,16 +276,12 @@ fn drag_gizmo(
                     return;
                 };
                 let cursor_vector: Vec3 = cursor_plane_intersection - plane_origin;
-                let cursor_projected_onto_handle = match &gizmo.drag_start {
-                    Some(drag_start) => *drag_start,
-                    None => {
-                        let handle_vector = axis;
-                        let cursor_projected_onto_handle = cursor_vector
-                            .dot(handle_vector.normalize())
-                            * handle_vector.normalize();
-                        gizmo.drag_start = Some(cursor_projected_onto_handle + plane_origin);
-                        return;
-                    }
+                let Some(cursor_projected_onto_handle) = gizmo.drag_start else {
+                    let handle_vector = axis;
+                    let cursor_projected_onto_handle =
+                        cursor_vector.dot(handle_vector.normalize()) * handle_vector.normalize();
+                    gizmo.drag_start = Some(cursor_projected_onto_handle + plane_origin);
+                    return;
                 };
                 let selected_handle_vec = cursor_projected_onto_handle - plane_origin;
                 let new_handle_vec = cursor_vector.dot(selected_handle_vec.normalize())
@@ -329,12 +311,9 @@ fn drag_gizmo(
                 } else {
                     return;
                 };
-                let drag_start = match gizmo.drag_start {
-                    Some(drag_start) => drag_start,
-                    None => {
-                        gizmo.drag_start = Some(cursor_plane_intersection);
-                        return;
-                    }
+                let Some(drag_start) = gizmo.drag_start else {
+                    gizmo.drag_start = Some(cursor_plane_intersection);
+                    return; // We just started dragging, no transformation is needed yet, exit early.
                 };
                 selected_iter.for_each(
                     |(inverse_parent, mut local_transform, initial_transform)| {
@@ -363,12 +342,9 @@ fn drag_gizmo(
                     return;
                 };
                 let cursor_vector = (cursor_plane_intersection - gizmo_origin).normalize();
-                let drag_start = match &gizmo.drag_start {
-                    Some(drag_start) => *drag_start,
-                    None => {
-                        gizmo.drag_start = Some(cursor_vector);
-                        return; // We just started dragging, no transformation is needed yet, exit early.
-                    }
+                let Some(drag_start) = gizmo.drag_start else {
+                    gizmo.drag_start = Some(cursor_vector);
+                    return; // We just started dragging, no transformation is needed yet, exit early.
                 };
                 let dot = drag_start.dot(cursor_vector);
                 let det = axis.dot(drag_start.cross(cursor_vector));
