@@ -4,12 +4,12 @@
 
 **transform gizmo for bevy**
 
-Forked from https://github.com/ForesightMiningSoftwareCorporation/bevy_transform_gizmo
-
 [![crates.io](https://img.shields.io/crates/v/irate_transform_gizmo)](https://crates.io/crates/irate_transform_gizmo)
 [![docs.rs](https://docs.rs/irate_transform_gizmo/badge.svg)](https://docs.rs/irate_transform_gizmo)
 [![CI](https://github.com/irate-devil/transform_gizmo/workflows/CI/badge.svg?branch=main)](https://github.com/irate-devil/transform_gizmo/actions?query=workflow%3A%22CI%22+branch%3Amain)
     
+Forked from [ForesightMiningSoftwareCorporation/bevy_transform_gizmo](https://github.com/ForesightMiningSoftwareCorporation/bevy_transform_gizmo)
+
 </div>
 
 # Demo
@@ -19,6 +19,8 @@ Run a demo of the gizmo by cloning this repository and running:
 ```shell
 cargo run --example demo
 ```
+
+Or read [the code](/examples/demo.rs) for an example.
 
 # Features
 
@@ -31,8 +33,6 @@ cargo run --example demo
 # Usage
 
 This plugin is built on and relies on [`bevy_mod_picking`](https://github.com/aevyrie/bevy_mod_picking) for mouse interaction with the scene.
-
-See the [minimal](examples/minimal.rs) demo for an example of a minimal implementation.
 
 # License
 

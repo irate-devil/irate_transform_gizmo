@@ -1,7 +1,6 @@
 [package]
 name = "irate_transform_gizmo"
 version = "0.1.0"
-authors = []
 edition = "2021"
 description = "A transform gizmo for Bevy"
 license = "MIT OR Apache-2.0"
