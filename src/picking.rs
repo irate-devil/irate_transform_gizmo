@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_mod_raycast::prelude::{RaycastSystem, RaycastMethod, RaycastSource, RaycastMesh};
+use bevy_mod_raycast::prelude::{RaycastMesh, RaycastMethod, RaycastSource, RaycastSystem};
 
 use crate::{TransformGizmoSettings, TransformGizmoSystem};
 
@@ -39,8 +39,7 @@ fn update_gizmo_raycast_with_cursor(
     for mut pick_source in &mut query {
         // Grab the most recent cursor event if it exists:
         if let Some(cursor_latest) = cursor.read().last() {
-            pick_source.cast_method =
-                RaycastMethod::Screenspace(cursor_latest.position);
+            pick_source.cast_method = RaycastMethod::Screenspace(cursor_latest.position);
         }
     }
 }

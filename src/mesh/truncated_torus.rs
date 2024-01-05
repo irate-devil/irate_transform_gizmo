@@ -24,8 +24,6 @@ impl Default for TruncatedTorus {
     }
 }
 
-
-
 impl From<TruncatedTorus> for Mesh {
     fn from(torus: TruncatedTorus) -> Self {
         // code adapted from http://apparat-engine.blogspot.com/2013/04/procedural-meshes-torus.html
