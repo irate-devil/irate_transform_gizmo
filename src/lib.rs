@@ -25,16 +25,13 @@ pub use normalization::Ui3dNormalization;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
 pub enum TransformGizmoSystem {
-    InputsSet,
     MainSet,
-    RaycastSet,
     NormalizeSet,
     UpdateSettings,
     AdjustViewTranslateGizmo,
     Place,
-    Hover,
-    Grab,
     Drag,
+    RaycastSet,
 }
 
 #[derive(Debug, Clone, Event)]
@@ -105,7 +102,6 @@ impl Plugin for TransformGizmoPlugin {
             PreUpdate,
             update_gizmo_settings
                 .in_set(TransformGizmoSystem::UpdateSettings)
-                .in_set(TransformGizmoSystem::InputsSet)
                 .run_if(|settings: Res<TransformGizmoSettings>| settings.enabled),
         );
 

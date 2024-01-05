@@ -30,6 +30,11 @@ Or read [the demo code](/examples/demo.rs) for an example.
 * Gizmo always renders on top of the main render pass
 * Gizmo is always the same size at it moves closer/further from the camera
 
+# Differences from bevy_transform_gizmo
+
+* Rotating with multiple items selected rotates the objects around the midpoint rather than their individual origins.
+* Basic 2D support. Currently uses the same gizmo as 3D but a 2D specific gizmo is coming.
+
 # Usage
 
 This plugin is built on and relies on [`bevy_mod_picking`](https://github.com/aevyrie/bevy_mod_picking) for mouse interaction with the scene.
