@@ -34,22 +34,19 @@ fn setup(
             })),
             material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
             transform: Transform::from_xyz(0.0, -0.5, 0.0),
-            ..Default::default()
+            ..default()
         },
         PickableBundle::default(),
         GizmoTransformable,
     ));
-
-    let tan = Color::rgb_u8(204, 178, 153);
-    let red = Color::rgb_u8(127, 26, 26);
 
     // cube
     commands
         .spawn((
             PbrBundle {
                 mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-                material: materials.add(red.into()),
-                transform: Transform::from_xyz(-1.0, 0.0, 0.0),
+                material: materials.add(Color::ORANGE_RED.into()),
+                transform: Transform::from_xyz(-1.0, 0.0, 1.0),
                 ..default()
             },
             PickableBundle::default(),
@@ -59,7 +56,7 @@ fn setup(
             commands.spawn((
                 PbrBundle {
                     mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-                    material: materials.add(tan.into()),
+                    material: materials.add(Color::ORANGE.into()),
                     transform: Transform::from_xyz(1.0, 0.0, 0.0),
                     ..default()
                 },
@@ -69,7 +66,7 @@ fn setup(
             commands.spawn((
                 PbrBundle {
                     mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-                    material: materials.add(tan.into()),
+                    material: materials.add(Color::ORANGE.into()),
                     transform: Transform::from_xyz(1.0, 1.0, 0.0),
                     ..default()
                 },
@@ -79,15 +76,19 @@ fn setup(
         });
 
     // light
-    commands.spawn(PointLightBundle {
-        transform: Transform::from_xyz(4.0, 8.0, 4.0),
-        ..Default::default()
+    commands.spawn(DirectionalLightBundle {
+        transform: Transform::default().looking_to(Vec3::NEG_ONE, Vec3::Y),
+        directional_light: DirectionalLight {
+            shadows_enabled: true,
+            ..default()
+        },
+        ..default()
     });
     // camera
     commands.spawn((
         Camera3dBundle {
-            transform: Transform::from_xyz(2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-            ..Default::default()
+            transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+            ..default()
         },
         GizmoPickSource::default(),
     ));

@@ -2,11 +2,11 @@
     
 # Irate Transform Gizmo
 
-**transform gizmo for bevy**
+**A transform gizmo for bevy**
 
 [![crates.io](https://img.shields.io/crates/v/irate_transform_gizmo)](https://crates.io/crates/irate_transform_gizmo)
 [![docs.rs](https://docs.rs/irate_transform_gizmo/badge.svg)](https://docs.rs/irate_transform_gizmo)
-[![CI](https://github.com/irate-devil/transform_gizmo/workflows/CI/badge.svg?branch=main)](https://github.com/irate-devil/transform_gizmo/actions?query=workflow%3A%22CI%22+branch%3Amain)
+[![CI](https://github.com/irate-devil/irate_transform_gizmo/workflows/CI/badge.svg?branch=main)](https://github.com/irate-devil/irate_transform_gizmo/actions?query=workflow%3A%22CI%22+branch%3Amain)
     
 Forked from [ForesightMiningSoftwareCorporation/bevy_transform_gizmo](https://github.com/ForesightMiningSoftwareCorporation/bevy_transform_gizmo)
 
@@ -20,7 +20,7 @@ Run a demo of the gizmo by cloning this repository and running:
 cargo run --example demo
 ```
 
-Or read [the code](/examples/demo.rs) for an example.
+Or read [the demo code](/examples/demo.rs) for an example.
 
 # Features
 

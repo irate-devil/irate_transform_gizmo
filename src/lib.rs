@@ -224,7 +224,7 @@ fn drag_gizmo(
     global_transforms: Query<&GlobalTransform>,
     gizmo_query: Query<(&GlobalTransform, &PickingInteraction), With<TransformGizmo>>,
 ) {
-    let Some(picking_camera) = pick_cam.iter().last() else {
+    let Ok(picking_camera) = pick_cam.get_single() else {
         return; // Not exactly one picking camera.
     };
     let Some(picking_ray) = picking_camera.get_ray() else {
@@ -379,11 +379,10 @@ fn hover_gizmo(
     hover_query: Query<&TransformGizmoInteraction>,
     mut hits: EventWriter<PointerHits>,
 ) {
+    let Ok((camera, gizmo_raycast_source)) = gizmo_raycast_source.get_single() else {
+        return; // Not exactly one picking camera.
+    };
     for (gizmo_entity, children, mut gizmo, mut interaction, _transform) in &mut gizmo_query {
-        let (camera, gizmo_raycast_source) = gizmo_raycast_source
-            .get_single()
-            .expect("Missing gizmo raycast source");
-
         if let Some((topmost_gizmo_entity, _)) = gizmo_raycast_source.get_nearest_intersection() {
             // Only update the gizmo state if it isn't being clicked (dragged) currently.
             if *interaction != PickingInteraction::Pressed {
@@ -616,12 +615,8 @@ fn gizmo_cam_copy_settings(
         (With<InternalGizmoCamera>, Without<GizmoPickSource>),
     >,
 ) {
-    let (main_cam, main_cam_pos, (main_proj, main_proj_ortho)) = if let Ok(x) =
-        main_cam.get_single()
-    {
-        x
-    } else {
-        error!("No `GizmoPickSource` found! Insert the `GizmoPickSource` component onto your primary 3d camera");
+    let Ok((main_cam, main_cam_pos, (main_proj, main_proj_ortho))) = main_cam.get_single() else {
+        error!("No GizmoPickSource found! Insert the GizmoPickSource component onto your primary camera.");
         return;
     };
     let (mut gizmo_cam, mut gizmo_cam_pos, mut proj) = gizmo_cam.single_mut();

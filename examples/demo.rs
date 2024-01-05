@@ -30,6 +30,7 @@ fn setup(
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Plane::from_size(5.0))),
             material: materials.add(Color::rgb(0.8, 0.8, 0.8).into()),
+            transform: Transform::from_xyz(1., 0., 0.),
             ..Default::default()
         },
         PickableBundle::default(),
