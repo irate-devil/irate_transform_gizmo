@@ -377,7 +377,7 @@ fn drag_gizmo(
                 selected_iter.for_each(
                     |(inverse_parent, mut local_transform, initial_transform)| {
                         let mut new_transform = initial_transform.transform;
-                        new_transform.rotate_around(gizmo_transform.translation(), rotation);
+                        new_transform.rotate_around(gizmo_origin, rotation);
                         let local = inverse_parent * new_transform.compute_matrix();
                         local_transform.set_if_neq(Transform::from_matrix(local));
                     },
