@@ -1,6 +1,6 @@
 <div align="center">
     
-# Bevy Transform Gizmo
+# Irate Transform Gizmo
 
 Forked from https://github.com/ForesightMiningSoftwareCorporation/bevy_transform_gizmo
 
