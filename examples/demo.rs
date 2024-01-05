@@ -7,7 +7,7 @@ fn main() {
         .add_plugins((
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
-                    present_mode: PresentMode::Immediate,
+                    present_mode: PresentMode::AutoNoVsync,
                     ..default()
                 }),
                 ..default()
@@ -48,9 +48,13 @@ fn setup(
         GizmoTransformable,
     ));
     // light
-    commands.spawn(PointLightBundle {
-        transform: Transform::from_xyz(4.0, 8.0, 4.0),
-        ..Default::default()
+    commands.spawn(DirectionalLightBundle {
+        transform: Transform::default().looking_to(Vec3::NEG_ONE, Vec3::Y),
+        directional_light: DirectionalLight {
+            shadows_enabled: true,
+            ..default()
+        },
+        ..default()
     });
     // camera
     commands.spawn((
