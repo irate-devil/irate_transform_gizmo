@@ -2,15 +2,13 @@
     
 # Irate Transform Gizmo
 
-Forked from https://github.com/ForesightMiningSoftwareCorporation/bevy_transform_gizmo
-
 **transform gizmo for bevy**
 
-https://user-images.githubusercontent.com/2632925/227469248-726b21c8-5308-49f0-9b04-e567833774e1.mp4
+Forked from https://github.com/ForesightMiningSoftwareCorporation/bevy_transform_gizmo
 
 [![crates.io](https://img.shields.io/crates/v/irate_transform_gizmo)](https://crates.io/crates/irate_transform_gizmo)
 [![docs.rs](https://docs.rs/irate_transform_gizmo/badge.svg)](https://docs.rs/irate_transform_gizmo)
-[![CI](https://github.com/irate-devil/irate_transform_gizmo/workflows/CI/badge.svg?branch=main)](https://github.com/irate-devil/irate_transform_gizmo/actions?query=workflow%3A%22CI%22+branch%3Amain)
+[![CI](https://github.com/irate-devil/transform_gizmo/workflows/CI/badge.svg?branch=main)](https://github.com/irate-devil/transform_gizmo/actions?query=workflow%3A%22CI%22+branch%3Amain)
     
 </div>
 
