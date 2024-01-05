@@ -1,6 +1,6 @@
 use bevy::{prelude::*, window::PresentMode};
-use bevy_mod_picking::DefaultPickingPlugins;
-use bevy_transform_gizmo::TransformGizmoPlugin;
+use bevy_mod_picking::{DefaultPickingPlugins, PickableBundle};
+use irate_transform_gizmo::{GizmoPickSource, GizmoTransformable, TransformGizmoPlugin};
 
 fn main() {
     App::new()
@@ -14,7 +14,7 @@ fn main() {
                 ..default()
             }),
             DefaultPickingPlugins,
-            TransformGizmoPlugin::new(Quat::default()),
+            TransformGizmoPlugin::default(),
         ))
         .add_systems(Startup, setup)
         .run();
@@ -37,8 +37,8 @@ fn setup(
             transform: Transform::from_xyz(0.0, -0.5, 0.0),
             ..Default::default()
         },
-        bevy_mod_picking::PickableBundle::default(),
-        bevy_transform_gizmo::GizmoTransformable,
+        PickableBundle::default(),
+        GizmoTransformable,
     ));
 
     let tan = Color::rgb_u8(204, 178, 153);
@@ -53,8 +53,8 @@ fn setup(
                 transform: Transform::from_xyz(-1.0, 0.0, 0.0),
                 ..default()
             },
-            bevy_mod_picking::PickableBundle::default(),
-            bevy_transform_gizmo::GizmoTransformable,
+            PickableBundle::default(),
+            GizmoTransformable,
         ))
         .with_children(|commands| {
             commands.spawn((
@@ -64,8 +64,8 @@ fn setup(
                     transform: Transform::from_xyz(1.0, 0.0, 0.0),
                     ..default()
                 },
-                bevy_mod_picking::PickableBundle::default(),
-                bevy_transform_gizmo::GizmoTransformable,
+                PickableBundle::default(),
+                GizmoTransformable,
             ));
             commands.spawn((
                 PbrBundle {
@@ -74,8 +74,8 @@ fn setup(
                     transform: Transform::from_xyz(1.0, 1.0, 0.0),
                     ..default()
                 },
-                bevy_mod_picking::PickableBundle::default(),
-                bevy_transform_gizmo::GizmoTransformable,
+                PickableBundle::default(),
+                GizmoTransformable,
             ));
         });
 
@@ -90,6 +90,6 @@ fn setup(
             transform: Transform::from_xyz(2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
             ..Default::default()
         },
-        bevy_transform_gizmo::GizmoPickSource::default(),
+        GizmoPickSource::default(),
     ));
 }

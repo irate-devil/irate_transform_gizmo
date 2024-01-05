@@ -55,24 +55,29 @@ pub struct GizmoTransformable;
 pub struct InternalGizmoCamera;
 
 #[derive(Resource, Clone, Debug)]
-pub struct GizmoSettings {
+pub struct TransformGizmoSettings {
     pub enabled: bool,
     /// Rotation to apply to the gizmo when it is placed. Used to align the gizmo to a different
     /// coordinate system.
     pub alignment_rotation: Quat,
     pub allow_rotation: bool,
+    pub enable_shortcuts: bool,
 }
 
-#[derive(Default, Debug, Clone)]
+#[derive(Debug, Clone)]
 pub struct TransformGizmoPlugin {
     // Rotation to apply to the gizmo when it is placed. Used to align the gizmo to a different
     // coordinate system.
-    alignment_rotation: Quat,
+    pub alignment_rotation: Quat,
+    pub enable_shortcuts: bool,
 }
 
-impl TransformGizmoPlugin {
-    pub fn new(alignment_rotation: Quat) -> Self {
-        TransformGizmoPlugin { alignment_rotation }
+impl Default for TransformGizmoPlugin {
+    fn default() -> Self {
+        Self {
+            alignment_rotation: Quat::IDENTITY,
+            enable_shortcuts: true,
+        }
     }
 }
 
@@ -85,11 +90,11 @@ impl Plugin for TransformGizmoPlugin {
             Shader::from_wgsl
         );
 
-        let alignment_rotation = self.alignment_rotation;
-        app.insert_resource(GizmoSettings {
+        app.insert_resource(TransformGizmoSettings {
             enabled: true,
-            alignment_rotation,
+            alignment_rotation: self.alignment_rotation,
             allow_rotation: true,
+            enable_shortcuts: self.enable_shortcuts,
         })
         .insert_resource(GizmoSystemsEnabled(true))
         .add_plugins((
@@ -114,7 +119,7 @@ impl Plugin for TransformGizmoPlugin {
             )
                 .chain()
                 .in_set(TransformGizmoSystem::InputsSet)
-                .run_if(|settings: Res<GizmoSettings>| settings.enabled),
+                .run_if(|settings: Res<TransformGizmoSettings>| settings.enabled),
         );
 
         // Main Set
@@ -133,7 +138,7 @@ impl Plugin for TransformGizmoPlugin {
             )
                 .chain()
                 .in_set(TransformGizmoSystem::MainSet)
-                .run_if(|settings: Res<GizmoSettings>| settings.enabled),
+                .run_if(|settings: Res<TransformGizmoSettings>| settings.enabled),
         );
 
         app.add_systems(Startup, mesh::build_gizmo)
@@ -376,15 +381,8 @@ fn drag_gizmo(
                 let rotation = Quat::from_axis_angle(axis, angle);
                 selected_iter.for_each(
                     |(inverse_parent, mut local_transform, initial_transform)| {
-                        let world_space_offset = initial_transform.transform.rotation
-                            * initial_transform.rotation_offset;
-                        let offset_rotated = rotation * world_space_offset;
-                        let offset = world_space_offset - offset_rotated;
-                        let new_transform = Transform {
-                            translation: initial_transform.transform.translation + offset,
-                            rotation: rotation * initial_transform.transform.rotation,
-                            scale: initial_transform.transform.scale,
-                        };
+                        let mut new_transform = initial_transform.transform;
+                        new_transform.rotate_around(gizmo_transform.translation(), rotation);
                         let local = inverse_parent * new_transform.compute_matrix();
                         local_transform.set_if_neq(Transform::from_matrix(local));
                     },
@@ -410,7 +408,7 @@ fn hover_gizmo(
     hover_query: Query<&TransformGizmoInteraction>,
     mut hits: EventWriter<PointerHits>,
 ) {
-    for (gizmo_entity, children, mut gizmo, mut interaction, _transform) in gizmo_query.iter_mut() {
+    for (gizmo_entity, children, mut gizmo, mut interaction, _transform) in &mut gizmo_query {
         let (camera, gizmo_raycast_source) = gizmo_raycast_source
             .get_single()
             .expect("Missing gizmo raycast source");
@@ -472,7 +470,7 @@ fn grab_gizmo(
     initial_transform_query: Query<Entity, With<InitialTransform>>,
 ) {
     if mouse_button_input.just_pressed(MouseButton::Left) {
-        for (mut gizmo, interaction, _transform) in gizmo_query.iter_mut() {
+        for (mut gizmo, interaction, _transform) in &mut gizmo_query {
             if *interaction == PickingInteraction::Pressed {
                 // Dragging has started, store the initial position of all selected meshes
                 for (selection, transform, entity, rotation_origin_offset) in
@@ -495,7 +493,7 @@ fn grab_gizmo(
             }
         }
     } else if mouse_button_input.just_released(MouseButton::Left) {
-        for (mut gizmo, mut interaction, transform) in gizmo_query.iter_mut() {
+        for (mut gizmo, mut interaction, transform) in &mut gizmo_query {
             *interaction = PickingInteraction::None;
             if let (Some(from), Some(interaction)) =
                 (gizmo.initial_transform, gizmo.current_interaction())
@@ -516,7 +514,7 @@ fn grab_gizmo(
 /// Places the gizmo in space relative to the selected entity(s).
 #[allow(clippy::type_complexity)]
 fn place_gizmo(
-    plugin_settings: Res<GizmoSettings>,
+    plugin_settings: Res<TransformGizmoSettings>,
     mut queries: ParamSet<(
         Query<
             (
@@ -577,7 +575,7 @@ fn propagate_gizmo_elements(
 }
 
 fn update_gizmo_settings(
-    plugin_settings: Res<GizmoSettings>,
+    plugin_settings: Res<TransformGizmoSettings>,
     mut interactions: Query<&mut TransformGizmoInteraction, Without<ViewTranslateGizmo>>,
     mut rotations: Query<&mut Visibility, With<RotationGizmo>>,
 ) {
@@ -585,7 +583,7 @@ fn update_gizmo_settings(
         return;
     }
     let rotation = plugin_settings.alignment_rotation;
-    for mut interaction in interactions.iter_mut() {
+    for mut interaction in &mut interactions {
         if let Some(rotated_interaction) = match *interaction {
             TransformGizmoInteraction::TranslateAxis { original, axis: _ } => {
                 Some(TransformGizmoInteraction::TranslateAxis {
@@ -617,7 +615,7 @@ fn update_gizmo_settings(
         }
     }
 
-    for mut visibility in rotations.iter_mut() {
+    for mut visibility in &mut rotations {
         if plugin_settings.allow_rotation {
             *visibility = Visibility::Inherited;
         } else {

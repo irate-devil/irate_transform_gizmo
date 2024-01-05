@@ -34,7 +34,11 @@ impl Material for GizmoMaterial {
     }
 
     fn alpha_mode(&self) -> AlphaMode {
-        AlphaMode::Opaque
+        if self.color.a() == 1. {
+            AlphaMode::Opaque
+        } else {
+            AlphaMode::Blend
+        }
     }
 
     fn specialize(

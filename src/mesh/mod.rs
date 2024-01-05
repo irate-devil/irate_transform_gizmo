@@ -27,8 +27,8 @@ pub fn build_gizmo(
 ) {
     let axis_length = 1.3;
     let arc_radius = 1.;
-    let plane_size = axis_length * 0.25;
-    let plane_offset = plane_size / 2. + axis_length * 0.2;
+    let plane_size = axis_length * 0.35;
+    let plane_offset = plane_size / 2.;
     // Define gizmo meshes
     let arrow_tail_mesh = meshes.add(Mesh::from(shape::Capsule {
         radius: 0.04,
@@ -43,7 +43,7 @@ pub fn build_gizmo(
     let plane_mesh = meshes.add(Mesh::from(shape::Plane::from_size(plane_size)));
     let sphere_mesh = meshes.add(
         Mesh::try_from(shape::Icosphere {
-            radius: 0.2,
+            radius: 0.25,
             subdivisions: 3,
         })
         .unwrap(),
@@ -55,7 +55,7 @@ pub fn build_gizmo(
     }));
     //let cube_mesh = meshes.add(Mesh::from(shape::Cube { size: 0.15 }));
     // Define gizmo materials
-    let (s, l) = (0.8, 0.6);
+    let (s, l) = (0.8, 0.55);
     let gizmo_matl_x = materials.add(GizmoMaterial::from(Color::hsl(0.0, s, l)));
     let gizmo_matl_y = materials.add(GizmoMaterial::from(Color::hsl(120.0, s, l)));
     let gizmo_matl_z = materials.add(GizmoMaterial::from(Color::hsl(240.0, s, l)));

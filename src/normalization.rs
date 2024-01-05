@@ -1,6 +1,6 @@
 use bevy::{prelude::*, render::camera::Camera, transform::TransformSystem};
 
-use crate::{GizmoPickSource, GizmoSettings, TransformGizmoSystem};
+use crate::{GizmoPickSource, TransformGizmoSettings, TransformGizmoSystem};
 
 pub struct Ui3dNormalization;
 impl Plugin for Ui3dNormalization {
@@ -11,7 +11,7 @@ impl Plugin for Ui3dNormalization {
                 .in_set(TransformGizmoSystem::NormalizeSet)
                 .after(TransformSystem::TransformPropagate)
                 .after(TransformGizmoSystem::Place)
-                .run_if(|settings: Res<GizmoSettings>| settings.enabled),
+                .run_if(|settings: Res<TransformGizmoSettings>| settings.enabled),
         );
     }
 }
@@ -50,7 +50,7 @@ pub fn normalize(
     };
     let view = camera_position.compute_matrix().inverse();
 
-    for (mut transform, mut global_transform, normalize) in query.p1().iter_mut() {
+    for (mut transform, mut global_transform, normalize) in &mut query.p1() {
         let distance = view.transform_point3(global_transform.translation()).z;
         let gt = global_transform.compute_transform();
         let pixel_end = if let Some(coords) = Camera::world_to_viewport(
