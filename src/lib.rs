@@ -221,7 +221,7 @@ fn drag_gizmo(
         ),
         Without<TransformGizmo>,
     >,
-    parent_query: Query<&GlobalTransform>,
+    global_transforms: Query<&GlobalTransform>,
     gizmo_query: Query<(&GlobalTransform, &PickingInteraction), With<TransformGizmo>>,
 ) {
     let picking_camera = if let Some(cam) = pick_cam.iter().last() {
@@ -264,13 +264,9 @@ fn drag_gizmo(
         .iter_mut()
         .filter(|(s, ..)| s.is_selected)
         .map(|(_, parent, local_transform, initial_global_transform)| {
-            let parent_global_transform = match parent {
-                Some(parent) => match parent_query.get(parent.get()) {
-                    Ok(transform) => *transform,
-                    Err(_) => GlobalTransform::IDENTITY,
-                },
-                None => GlobalTransform::IDENTITY,
-            };
+            let parent_global_transform = parent
+                .and_then(|parent| global_transforms.get(parent.get()).ok())
+                .unwrap_or(&GlobalTransform::IDENTITY);
             let parent_mat = parent_global_transform.compute_matrix();
             let inverse_parent = parent_mat.inverse();
             (inverse_parent, local_transform, initial_global_transform)
@@ -429,7 +425,7 @@ fn hover_gizmo(
             *interaction = PickingInteraction::None
         }
 
-        if !matches!(*interaction, PickingInteraction::None) {
+        if *interaction != PickingInteraction::None {
             // Tell picking backend we're hovering the gizmo, so the `NoDeselect` component takes effect.
             let data = HitData {
                 camera,
@@ -557,35 +553,33 @@ fn update_gizmo_settings(
     }
     let rotation = plugin_settings.alignment_rotation;
     for mut interaction in &mut interactions {
-        if let Some(rotated_interaction) = match *interaction {
+        *interaction = match *interaction {
             TransformGizmoInteraction::TranslateAxis { original, axis: _ } => {
-                Some(TransformGizmoInteraction::TranslateAxis {
+                TransformGizmoInteraction::TranslateAxis {
                     original,
                     axis: rotation.mul_vec3(original),
-                })
+                }
             }
             TransformGizmoInteraction::TranslatePlane {
                 original,
                 normal: _,
-            } => Some(TransformGizmoInteraction::TranslatePlane {
+            } => TransformGizmoInteraction::TranslatePlane {
                 original,
                 normal: rotation.mul_vec3(original),
-            }),
+            },
             TransformGizmoInteraction::RotateAxis { original, axis: _ } => {
-                Some(TransformGizmoInteraction::RotateAxis {
+                TransformGizmoInteraction::RotateAxis {
                     original,
                     axis: rotation.mul_vec3(original),
-                })
+                }
             }
             TransformGizmoInteraction::ScaleAxis { original, axis: _ } => {
-                Some(TransformGizmoInteraction::ScaleAxis {
+                TransformGizmoInteraction::ScaleAxis {
                     original,
                     axis: rotation.mul_vec3(original),
-                })
+                }
             }
-        } {
-            *interaction = rotated_interaction;
-        }
+        };
     }
 
     for mut visibility in &mut rotations {
