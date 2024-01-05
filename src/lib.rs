@@ -603,13 +603,22 @@ fn adjust_view_translate_gizmo(
 }
 
 fn gizmo_cam_copy_settings(
-    main_cam: Query<(Ref<Camera>, Ref<GlobalTransform>, Ref<Projection>), With<GizmoPickSource>>,
+    main_cam: Query<
+        (
+            Ref<Camera>,
+            Ref<GlobalTransform>,
+            AnyOf<(Ref<Projection>, Ref<OrthographicProjection>)>,
+        ),
+        With<GizmoPickSource>,
+    >,
     mut gizmo_cam: Query<
         (&mut Camera, &mut GlobalTransform, &mut Projection),
         (With<InternalGizmoCamera>, Without<GizmoPickSource>),
     >,
 ) {
-    let (main_cam, main_cam_pos, main_proj) = if let Ok(x) = main_cam.get_single() {
+    let (main_cam, main_cam_pos, (main_proj, main_proj_ortho)) = if let Ok(x) =
+        main_cam.get_single()
+    {
         x
     } else {
         error!("No `GizmoPickSource` found! Insert the `GizmoPickSource` component onto your primary 3d camera");
@@ -623,7 +632,13 @@ fn gizmo_cam_copy_settings(
         *gizmo_cam = main_cam.clone();
         gizmo_cam.order += 10;
     }
-    if main_proj.is_changed() {
-        *proj = main_proj.clone();
+    if let Some(main_proj) = main_proj {
+        if main_proj.is_changed() {
+            *proj = main_proj.clone();
+        }
+    } else if let Some(main_proj_ortho) = main_proj_ortho {
+        if main_proj_ortho.is_changed() {
+            *proj = Projection::Orthographic(main_proj_ortho.clone());
+        }
     }
 }

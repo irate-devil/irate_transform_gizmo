@@ -4,7 +4,6 @@ use irate_transform_gizmo::{GizmoPickSource, GizmoTransformable, TransformGizmoP
 
 fn main() {
     App::new()
-        .insert_resource(Msaa::Sample4)
         .add_plugins((
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {

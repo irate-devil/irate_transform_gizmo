@@ -17,9 +17,8 @@ opt-level = 1
 
 [dependencies]
 bevy = { version = "0.12", default-features = false, features = [
-    "bevy_render",
-    "bevy_core_pipeline",
     "bevy_pbr",
+    "bevy_sprite",
 ] }
 bevy_mod_picking = { version = "0.17", default-features = false, features = [
     "selection",
@@ -29,6 +28,7 @@ bevy_mod_raycast = "0.16"
 [dev-dependencies]
 bevy = { version = "0.12", default-features = false, features = [
     "bevy_pbr",
+    "bevy_sprite",
     "bevy_winit",
     "x11",
     "tonemapping_luts",
@@ -37,7 +37,7 @@ bevy = { version = "0.12", default-features = false, features = [
 ] }
 bevy_mod_picking = { version = "0.17", default-features = false, features = [
     "selection",
-    "backend_raycast",
     "highlight",
-    "bevy_picking_raycast",
+    "backend_raycast",
+    "backend_sprite",
 ] }
