@@ -205,7 +205,6 @@ pub enum TransformGizmoInteraction {
 #[derive(Component)]
 struct InitialTransform {
     transform: Transform,
-    rotation_offset: Vec3,
 }
 
 /// Updates the position of the gizmo and selected meshes while the gizmo is being dragged.
@@ -447,9 +446,6 @@ fn hover_gizmo(
     }
 }
 
-#[derive(Component)]
-pub struct RotationOriginOffset(pub Vec3);
-
 /// Tracks when one of the gizmo handles has been clicked on.
 #[allow(clippy::type_complexity, clippy::too_many_arguments)]
 fn grab_gizmo(
@@ -461,27 +457,17 @@ fn grab_gizmo(
         &mut PickingInteraction,
         &GlobalTransform,
     )>,
-    selected_items_query: Query<(
-        &PickSelection,
-        &GlobalTransform,
-        Entity,
-        Option<&RotationOriginOffset>,
-    )>,
+    selected_items_query: Query<(&PickSelection, &GlobalTransform, Entity)>,
     initial_transform_query: Query<Entity, With<InitialTransform>>,
 ) {
     if mouse_button_input.just_pressed(MouseButton::Left) {
         for (mut gizmo, interaction, _transform) in &mut gizmo_query {
             if *interaction == PickingInteraction::Pressed {
                 // Dragging has started, store the initial position of all selected meshes
-                for (selection, transform, entity, rotation_origin_offset) in
-                    selected_items_query.iter()
-                {
+                for (selection, transform, entity) in selected_items_query.iter() {
                     if selection.is_selected {
                         commands.entity(entity).insert(InitialTransform {
                             transform: transform.compute_transform(),
-                            rotation_offset: rotation_origin_offset
-                                .map(|offset| offset.0)
-                                .unwrap_or(Vec3::ZERO),
                         });
                     }
                 }
@@ -516,27 +502,14 @@ fn grab_gizmo(
 fn place_gizmo(
     plugin_settings: Res<TransformGizmoSettings>,
     mut queries: ParamSet<(
-        Query<
-            (
-                &PickSelection,
-                &GlobalTransform,
-                Option<&RotationOriginOffset>,
-            ),
-            With<GizmoTransformable>,
-        >,
+        Query<(&PickSelection, &GlobalTransform), With<GizmoTransformable>>,
         Query<(&mut GlobalTransform, &mut Transform, &mut Visibility), With<TransformGizmo>>,
     )>,
 ) {
     let selected: Vec<_> = queries
         .p0()
         .iter()
-        .filter(|(s, ..)| s.is_selected)
-        .map(|(_s, t, offset)| {
-            t.translation()
-                + offset
-                    .map(|o| t.compute_transform().rotation * o.0)
-                    .unwrap_or(Vec3::ZERO)
-        })
+        .filter_map(|(s, t)| s.is_selected.then_some(t.translation()))
         .collect();
     let n_selected = selected.len();
     let transform_sum = selected.iter().fold(Vec3::ZERO, |acc, t| acc + *t);
